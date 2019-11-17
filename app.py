@@ -56,10 +56,11 @@ def printHostsTable(arrHosts, dictAlias={}):
 
 def main():
     # Read configuration file
-    if os.path.exists('settings.ini'):
+    pathSettings = os.path.join(os.path.abspath(os.path.dirname(os.path.realpath(__file__))), 'settings.ini')
+    if os.path.exists(pathSettings):
         alias = configparser.ConfigParser(delimiters=['='])
         alias.optionxform = str
-        alias.read('settings.ini')
+        alias.read(pathSettings)
     else:
         alias = None
 
