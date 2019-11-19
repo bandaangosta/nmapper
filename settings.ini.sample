@@ -1,3 +1,7 @@
+[config]
+NUM_ATTEMPTS = 3
+BASE_IP_NMAP = 192.168.1.0
+
 [alias]
 00:E0:4C:53:44:AA = router
 00:E0:4C:53:44:BB = laptop1

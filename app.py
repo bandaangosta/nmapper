@@ -28,7 +28,7 @@ import configparser
 def getHosts():
     nm = nmap.PortScanner()
     # nm.scan(hosts='192.168.1.0/24', arguments='-sP -PE -PA21,23,80,3389')
-    nm.scan(hosts='192.168.1.0/24', arguments='-sn')
+    nm.scan(hosts='{}/24'.format('192.168.1.0'), arguments='-sn')
 
     # MAC address is only retrieved when run as sudo
     hosts_list = [(x, nm[x]['hostnames'][0]['name'], nm[x]['addresses'].get('mac'), nm[x]['status']['state']) for x in nm.all_hosts()]
@@ -38,6 +38,8 @@ def getHosts():
     return {'hosts': output}
 
 def printHostsTable(arrHosts, dictAlias={}):
+
+    print('Number of hosts found: {}'.format(len(arrHosts)))
 
     table = prettytable.PrettyTable(['Host', 'Hostname', 'MAC', 'Alias', 'Status'])
     table.align['Host'] = 'r'
@@ -64,13 +66,25 @@ def main():
     else:
         alias = None
 
-    data = getHosts()
-    if data['hosts']:
+    NUM_ATTEMPTS = 3
+    i = 0
+    totalHosts = []
+
+    while i < NUM_ATTEMPTS:
+        data = getHosts()
+        totalHosts.extend(data['hosts'])
+        i = i + 1
+
+    finalHosts = {}
+    for host in totalHosts:
+        finalHosts[host['host']] = host
+
+    if finalHosts:
         # Present results
         if alias:
-            printHostsTable(data['hosts'], alias['alias'])
+            printHostsTable(list(finalHosts.values()) , alias['alias'])
         else:
-            printHostsTable(data['hosts'])
+            printHostsTable(list(finalHosts.values()) )
     else:
         print('No hosts found')
 
