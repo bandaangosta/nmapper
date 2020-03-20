@@ -84,12 +84,18 @@ class Nmapper():
         table.align['Hostname'] = 'r'
         table.align['MAC'] = 'r'
         table.align['Alias'] = 'r'
+        
         for row in arrHosts:
+
+            if row['mac']:
+                alias = self.alias.get(row['mac']) or self.alias.get(row['mac'].lower())
+            else:
+                alias = None
             table.add_row([
                            row['host'],
                            row['hostname'],
                            row['mac'],
-                           self.alias.get(row['mac']),
+                           alias,
                            row['status']
                           ])
         print('\n{}\n'.format(table))
