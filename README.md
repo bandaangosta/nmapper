@@ -8,7 +8,7 @@ A tool to scan and list local network hosts. Useful for quick network discovery 
 
 ### Requirements:
 
-    This tool requires `nmap` to be available in the system. On Debian/Ubuntu:
+This tool requires `nmap` to be available in the system. On Debian/Ubuntu:
 
     apt install nmap
 
