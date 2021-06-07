@@ -18,6 +18,7 @@ def callback():
 
     Usage:
 
+    \b
     nmapper hosts
     nmapper hosts 1     # for 1 scan pass, instead of 3 (default)
     nmapper config list # to show all configuration options
@@ -26,7 +27,6 @@ def callback():
     nmapper alias --help # for more alias commands, including adding and removing aliases
 
     Retrieving MAC addresses can only be done when application is run with elevated privileges
-
     """
 
 @app.command(short_help='List local network hosts')
