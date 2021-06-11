@@ -32,11 +32,11 @@ def callback():
 @app.command(short_help='List local network hosts')
 def hosts(attempts: Optional[int] = typer.Argument(None), base_ip: Optional[str] = typer.Argument(None)):
     nm = nmapper.Nmapper()
-    hosts = nm.getHostsMultiAttempts(base_ip, attempts)
+    hosts = nm.get_hosts_multi_attempts(base_ip, attempts)
 
     # Present results
     if hosts['hosts']:
-        nm.printHostsTable(hosts['hosts'])
+        nm.print_hosts_table(hosts['hosts'])
     else:
         print('No hosts found')
         return

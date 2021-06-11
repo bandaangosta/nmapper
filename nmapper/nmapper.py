@@ -1,4 +1,5 @@
 import os
+import datetime
 import nmap
 import prettytable
 import configparser
@@ -30,7 +31,7 @@ class Nmapper():
         self.base_ip_nmap = self.config.get('BASE_IP_NMAP', '192.168.1.0')
         self.attempts = self.config.get('NUM_ATTEMPTS', '3')
 
-    def getHosts(self, base_ip: str = None):
+    def get_hosts(self, base_ip: str = None):
         nm = nmap.PortScanner()
 
         if base_ip is None:
@@ -47,7 +48,7 @@ class Nmapper():
             output.append({'host': host, 'hostname': hostname, 'mac': mac, 'status': status})
         return {'hosts': output}
 
-    def getHostsMultiAttempts(self, base_ip: str = None, attempts: int = None):
+    def get_hosts_multi_attempts(self, base_ip: str = None, attempts: int = None, verbose: bool = True):
         i = 0
         totalHosts = []
 
@@ -61,10 +62,11 @@ class Nmapper():
         else:
             _base_ip = base_ip
 
-        print('Getting hosts in {}/24, {} passes...'.format(_base_ip, _attempts))
+        if verbose:
+            print('Getting hosts in {}/24, {} passes...'.format(_base_ip, _attempts))
 
         while i < _attempts:
-            data = self.getHosts(base_ip)
+            data = self.get_hosts(base_ip)
             totalHosts.extend(data['hosts'])
             i = i + 1
 
@@ -105,8 +107,10 @@ class Nmapper():
         with open(self.path_settings, 'w') as f:
             self.settings.write(f)
 
-    def printHostsTable(self, arrHosts):
-        print('Number of hosts found: {}'.format(len(arrHosts)))
+    def print_hosts_table(self, arrHosts):
+        utcnow = datetime.datetime.utcnow()
+        print('Scan timestamp: {} UTC'.format(utcnow.strftime("%Y-%m-%d %H:%M")))
+        print('\nNumber of hosts found: {}'.format(len(arrHosts)))
 
         table = prettytable.PrettyTable(['Host', 'Hostname', 'MAC', 'Alias', 'Status'])
         table.align['Host'] = 'r'

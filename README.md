@@ -23,8 +23,12 @@ This tool requires `nmap` to be available in the system. On Debian/Ubuntu:
 
 Retrieving MAC addresses can only be done when application is run with elevated privileges
 
-### Examples
+#### Getting your IP address to scan for hosts on the same network
 
+    $ hostname -I
+
+### Examples
+#### Scan for hosts including MAC addresses
     $ sudo nmapper hosts
     Getting hosts in 192.168.1.0/24, 3 passes...
     Number of hosts found: 8
@@ -48,7 +52,7 @@ Retrieving MAC addresses can only be done when application is run with elevated 
     Removed hosts since last scan:
     192.168.1.150
 
-
+#### Scan for hosts no MAC addresses
     $ nmapper hosts
     Getting hosts in 192.168.1.0/24, 3 passes...
     Number of hosts found: 8
@@ -72,6 +76,11 @@ Retrieving MAC addresses can only be done when application is run with elevated 
     Removed hosts since last scan:
     192.168.1.133
 
+#### Scan for hosts, 5 passes, on 172.17.0.xxx network
+    $ nmapper hosts 5 172.17.0.0/24
+    ...
+    
+#### Show configuration parameters
     $ nmapper config list
 
     +--------------+-------------+
@@ -81,6 +90,7 @@ Retrieving MAC addresses can only be done when application is run with elevated 
     | BASE_IP_NMAP | 192.168.1.0 |
     +--------------+-------------+
 
+#### Show MAC addresses alias list
     $ nmapper alias list
     
     +-------+-------------------+--------------------+
@@ -96,7 +106,7 @@ Retrieving MAC addresses can only be done when application is run with elevated 
     |     7 | 9C:ED:6B:4C:08:60 |             vision |
     +-------+-------------------+--------------------+
 
-
+#### Add new MAC address alias 
     $ nmapper alias add D0:32:87:B1:73:86 loki
     
     +-------+-------------------+--------------------+
