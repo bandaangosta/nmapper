@@ -1,6 +1,7 @@
 from pprint import pprint
 import typer
 from nmapper import nmapper
+from nmapper import __version__
 from typing import Optional
 
 # Command-line application commands and subcommands based in Typer
@@ -49,6 +50,10 @@ def hosts(attempts: Optional[int] = typer.Argument(None), base_ip: Optional[str]
     print('\nRemoved hosts since last scan:')
     if 'removed_hosts' in hosts:
         print('\n'.join(hosts['removed_hosts']))
+
+@app.command(short_help='Show current version')
+def version():
+    print(__version__)
 
 @config_app.command("list", short_help='List application settings')
 def print_config():
