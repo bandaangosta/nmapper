@@ -25,7 +25,8 @@ setuptools.setup(
         "typer==0.3.2",
         "configparser==4.0.2",
         "prettytable==0.7.2",
-        "python-nmap==0.6.1"
+        "python-nmap==0.6.1",
+        "config-path==1.0.2"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

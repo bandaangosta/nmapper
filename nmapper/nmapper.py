@@ -1,23 +1,50 @@
 import os
+import shutil
 import datetime
 import nmap
 import prettytable
 import configparser
 import pprint
 import typer
+from config_path import ConfigPath
 
 class Nmapper():
     """Class to query local network to list and describe existing hosts"""
-    def __init__(self, path_settings=None):
-        # Read configuration file
-        if path_settings is None:
-            path_settings = os.path.join(os.path.abspath(os.path.dirname(os.path.realpath(__file__))), 'resources', 'settings.ini')
-        self.path_settings = path_settings
 
-        if os.path.exists(path_settings):
+    # Application constants for local configuration file definition
+    APP_NAME = 'nmapper'
+    APP_VENDOR_DOMAIN = 'jlo.cl'
+    APP_CONFIG_FILE_TYPE = '.ini'
+
+    def __init__(self, path_settings=None, verbose=True):
+        self.verbose = verbose
+
+        if path_settings is None:
+            # OS-independent definition of local configuration file
+            conf_path = ConfigPath(self.APP_NAME, self.APP_VENDOR_DOMAIN, self.APP_CONFIG_FILE_TYPE)
+            local_path = conf_path.saveFilePath(mkdir=True)
+        else:
+            local_path = path_settings
+
+        # Template configuration file provided with package
+        config_template = os.path.join(os.path.abspath(os.path.dirname(os.path.realpath(__file__))), 'resources', 'settings.ini')
+
+        # On first-time execution, create new configuration file from template file in package
+        if not os.path.exists(local_path):
+            if(shutil.copyfile(config_template, local_path)):
+                if self.verbose:
+                    print("Created local configuration file: ", local_path)
+
+        # Read configuration file
+        if not os.path.exists(local_path):
+            self.path_settings = config_template
+        else:
+            self.path_settings = local_path
+
+        if os.path.exists(self.path_settings):
             self.settings = configparser.ConfigParser(delimiters=['='])
             self.settings.optionxform = str
-            self.settings.read(path_settings)
+            self.settings.read(self.path_settings)
         else:
             self.settings = None
 
@@ -32,6 +59,8 @@ class Nmapper():
         self.attempts = self.config.get('NUM_ATTEMPTS', '3')
 
     def get_hosts(self, base_ip: str = None):
+        '''Scan network for active hosts'''
+
         nm = nmap.PortScanner()
 
         if base_ip is None:
@@ -48,7 +77,9 @@ class Nmapper():
             output.append({'host': host, 'hostname': hostname, 'mac': mac, 'status': status})
         return {'hosts': output}
 
-    def get_hosts_multi_attempts(self, base_ip: str = None, attempts: int = None, verbose: bool = True):
+    def get_hosts_multi_attempts(self, base_ip: str = None, attempts: int = None):
+        '''Scan network for active hosts, doing several passes for added reliability'''
+
         i = 0
         totalHosts = []
 
@@ -62,7 +93,7 @@ class Nmapper():
         else:
             _base_ip = base_ip
 
-        if verbose:
+        if self.verbose:
             print('Getting hosts in {}/24, {} passes...'.format(_base_ip, _attempts))
 
         while i < _attempts:
@@ -87,7 +118,7 @@ class Nmapper():
                 last_ips = _last_ips.split(',')
             else:
                 self.settings.add_section('results')
-                _last_ips = []
+                last_ips = []
 
             # New hosts since last scan
             new_hosts = list(set(ips).difference(set(last_ips)))
@@ -104,10 +135,13 @@ class Nmapper():
             return {'hosts': [], 'new_hosts': [], 'removed_hosts': []}
 
     def write_config_file(self):
+        '''Write configuration file to disk'''
         with open(self.path_settings, 'w') as f:
             self.settings.write(f)
 
     def print_hosts_table(self, arrHosts):
+        '''Print scan results table'''
+
         utcnow = datetime.datetime.utcnow()
         print('Scan timestamp: {} UTC'.format(utcnow.strftime("%Y-%m-%d %H:%M")))
         print('\nNumber of hosts found: {}'.format(len(arrHosts)))
