@@ -7,6 +7,7 @@ import configparser
 import pprint
 import typer
 from config_path import ConfigPath
+from tqdm import tqdm
 
 class Nmapper():
     """Class to query local network to list and describe existing hosts"""
@@ -80,9 +81,6 @@ class Nmapper():
     def get_hosts_multi_attempts(self, base_ip: str = None, attempts: int = None):
         '''Scan network for active hosts, doing several passes for added reliability'''
 
-        i = 0
-        totalHosts = []
-
         if attempts is None:
             _attempts = int(self.config.get('NUM_ATTEMPTS', '3'))
         else:
@@ -96,7 +94,10 @@ class Nmapper():
         if self.verbose:
             print('Getting hosts in {}/24, {} passes...'.format(_base_ip, _attempts))
 
-        while i < _attempts:
+        i = 0
+        totalHosts = []
+
+        for i in tqdm(range(_attempts)):
             data = self.get_hosts(base_ip)
             totalHosts.extend(data['hosts'])
             i = i + 1
