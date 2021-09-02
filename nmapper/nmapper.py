@@ -4,10 +4,12 @@ import datetime
 import nmap
 import prettytable
 import configparser
-import pprint
 import typer
 from config_path import ConfigPath
-from tqdm import tqdm
+
+from rich.console import Console
+from rich.table import Table
+from rich.progress import track
 
 class Nmapper():
     """Class to query local network to list and describe existing hosts"""
@@ -97,7 +99,7 @@ class Nmapper():
         i = 0
         totalHosts = []
 
-        for i in tqdm(range(_attempts)):
+        for i in track(range(_attempts)):
             data = self.get_hosts(base_ip)
             totalHosts.extend(data['hosts'])
             i = i + 1
@@ -144,28 +146,31 @@ class Nmapper():
         '''Print scan results table'''
 
         utcnow = datetime.datetime.utcnow()
-        print('Scan timestamp: {} UTC'.format(utcnow.strftime("%Y-%m-%d %H:%M")))
-        print('\nNumber of hosts found: {}'.format(len(arrHosts)))
+        print('Scan timestamp: {} UTC\n'.format(utcnow.strftime("%Y-%m-%d %H:%M")))
 
-        table = prettytable.PrettyTable(['Host', 'Hostname', 'MAC', 'Alias', 'Status'])
-        table.align['Host'] = 'r'
-        table.align['Hostname'] = 'r'
-        table.align['MAC'] = 'r'
-        table.align['Alias'] = 'r'
+
+        table = Table(title=f'{len(arrHosts)} hosts in {self.base_ip_nmap}/24')
+        table.add_column('Host', justify='right')
+        table.add_column('Hostname', justify='right')
+        table.add_column('MAC', justify='right')
+        table.add_column('Alias', justify='right')
+        table.add_column('Status', justify='right')
 
         for row in arrHosts:
             if row['mac']:
                 alias = self.alias.get(row['mac']) or self.alias.get(row['mac'].lower())
             else:
                 alias = None
-            table.add_row([
-                           row['host'],
-                           row['hostname'],
-                           row['mac'],
-                           alias,
-                           row['status']
-                          ])
-        print('\n{}\n'.format(table))
+            table.add_row(
+                row['host'],
+                row['hostname'],
+                row['mac'],
+                alias,
+                f"[green]{row['status']}" if row['status'] =="up" else f"[red]{row['status']}"
+            )
+
+        console = Console()
+        console.print(table)
 
     def print_config(self):
         '''Prints application parameters from config file'''

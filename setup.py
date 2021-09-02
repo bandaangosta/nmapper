@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="nmapper",
-    version="0.2.0",
+    version="0.3.0",
     description="Scan and list local network hosts",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -27,7 +27,7 @@ setuptools.setup(
         "prettytable==0.7.2",
         "python-nmap==0.6.1",
         "config-path==1.0.2",
-        "tqdm==4.61.0"
+        "rich==10.9.0"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
