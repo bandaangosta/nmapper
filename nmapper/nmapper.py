@@ -2,13 +2,13 @@ import os
 import shutil
 import datetime
 import nmap
-import prettytable
 import configparser
 import typer
 from config_path import ConfigPath
 
 from rich.console import Console
 from rich.table import Table
+from rich.text import Text
 from rich.progress import track
 
 class Nmapper():
@@ -146,7 +146,7 @@ class Nmapper():
         '''Print scan results table'''
 
         utcnow = datetime.datetime.utcnow()
-        print('Scan timestamp: {} UTC\n'.format(utcnow.strftime("%Y-%m-%d %H:%M")))
+        print('Scan timestamp: {} UTC'.format(utcnow.strftime("%Y-%m-%d %H:%M")))
 
 
         table = Table(title=f'{len(arrHosts)} hosts in {self.base_ip_nmap}/24')
@@ -164,24 +164,31 @@ class Nmapper():
             table.add_row(
                 row['host'],
                 row['hostname'],
-                row['mac'],
+                Text(row['mac'] if row['mac'] is not None else ""),
                 alias,
                 f"[green]{row['status']}" if row['status'] =="up" else f"[red]{row['status']}"
             )
 
         console = Console()
+        print()
         console.print(table)
+        print()
+
 
     def print_config(self):
         '''Prints application parameters from config file'''
 
-        table = prettytable.PrettyTable(['Key', 'Value'])
-        table.align['Key'] = 'r'
-        table.align['Value'] = 'r'
+        table = Table(title='General configuration')
+        table.add_column('Key', justify='right')
+        table.add_column('Value', justify='right')
 
         for item in self.config.items():
-            table.add_row([item[0], item[1]])
-        print('\n{}\n'.format(table))
+            table.add_row(item[0], item[1])
+
+        console = Console()
+        print()
+        console.print(table)
+        print()
 
     def edit_config(self, attempts: int=typer.Argument(None), base_ip: str=typer.Argument(None)):
         '''Edit number of attempts or base ip in config file'''
@@ -204,14 +211,18 @@ class Nmapper():
     def print_alias(self):
         '''Prints mac address -> alias list from config file'''
 
-        table = prettytable.PrettyTable(['Index', 'Key', 'Value'])
-        table.align['Index'] = 'r'
-        table.align['Key'] = 'r'
-        table.align['Value'] = 'r'
+        table = Table(title='Alias definitions')
+        table.add_column('Index', justify='right')
+        table.add_column('Key', justify='right')
+        table.add_column('Value', justify='right')
 
         for i,item in enumerate(self.alias.items()):
-            table.add_row([i, item[0], item[1]])
-        print('\n{}\n'.format(table))
+            table.add_row(str(i), Text(item[0]), item[1])
+
+        console = Console()
+        print()
+        console.print(table)
+        print()
 
     def add_alias(self, mac:str, alias: str):
         '''Add a new mac address -> alias in config file'''
